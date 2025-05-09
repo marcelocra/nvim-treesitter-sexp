@@ -35,14 +35,16 @@ function M.get_valid_nodes(pred, comp, capture_names, opts)
 
   local nodes = {}
   for _, match in query:iter_matches(node, 0, start, stop, { max_start_depth = opts.max_start_depth }) do
-    for id, cnode in pairs(match) do
-      local name = query.captures[id]
-      if
-        vim.tbl_contains(capture_names, name)
-        and (vim.tbl_isempty(nodes) or not cnode:equal(nodes[#nodes]))
-        and pred(cnode)
-      then
-        nodes[#nodes + 1] = cnode
+    for id, cnodes in pairs(match) do
+      for _, cnode in pairs(cnodes) do
+        local name = query.captures[id]
+        if
+          vim.tbl_contains(capture_names, name)
+          and (vim.tbl_isempty(nodes) or not cnode:equal(nodes[#nodes]))
+          and pred(cnode)
+        then
+          nodes[#nodes + 1] = cnode
+        end
       end
     end
   end
@@ -67,14 +69,16 @@ function M.get_valid_forms(pred, comp)
   local forms = {}
   for _, match in query:iter_matches(root, 0, cursor_pos[1] - 1, cursor_pos[1]) do
     local result = {}
-    for id, cnode in pairs(match) do
-      local name = query.captures[id]
-      if name == "sexp.form" then
-        result.outer = cnode
-      elseif name == "sexp.open" then
-        result.open = cnode
-      elseif name == "sexp.close" then
-        result.close = cnode
+    for id, cnodes in pairs(match) do
+      for _, cnode in pairs(cnodes) do
+        local name = query.captures[id]
+        if name == "sexp.form" then
+          result.outer = cnode
+        elseif name == "sexp.open" then
+          result.open = cnode
+        elseif name == "sexp.close" then
+          result.close = cnode
+        end
       end
     end
     if
